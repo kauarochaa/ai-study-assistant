@@ -1,0 +1,13 @@
+services:
+  assistant:
+    build: .
+    ports:
+      - "127.0.0.1:8501:8501"
+    env_file: .env
+    restart: unless-stopped
+    volumes:
+      - study_data:/app/data
+      - study_documents:/app/documents
+volumes:
+  study_data:
+  study_documents:

@@ -7,8 +7,8 @@ from pypdf import PdfReader
 
 
 SUPPORTED_SUFFIXES = {".pdf", ".txt", ".md"}
-CHUNK_SIZE = 1_000
-CHUNK_OVERLAP = 150
+CHUNK_SIZE = 400
+CHUNK_OVERLAP = 60
 
 
 @dataclass(frozen=True)

@@ -1,0 +1,32 @@
+name: Verificações
+on: [push, pull_request, workflow_dispatch]
+permissions:
+  contents: read
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.13'
+          cache: pip
+      - run: pip install -r requirements.txt
+      - run: python -m unittest discover -s tests -v
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - run: docker build -t study-assistant:test .
+      - name: Verificar inicialização do contêiner
+        shell: bash
+        run: |
+          docker run -d --name study-test -p 127.0.0.1:8501:8501 study-assistant:test
+          for attempt in {1..30}; do
+            if curl --fail --silent http://127.0.0.1:8501/_stcore/health; then exit 0; fi
+            sleep 2
+          done
+          docker logs study-test
+          exit 1
+      - if: always()
+        run: docker rm -f study-test || true

@@ -6,3 +6,9 @@ __pycache__/
 .pytest_cache/
 .ruff_cache/
 data/
+documents/*
+!documents/.gitkeep
+!documents/Resumo_Cloud_Computing.pdf
+backups/
+*.pem
+*.key
