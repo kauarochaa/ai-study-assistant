@@ -19,6 +19,19 @@ Para experimentar sem preparar arquivos, clique em **Adicionar material de exemp
 
 ## OpenAI
 
+### IA gratuita local com Ollama
+
+Instale e abra o Ollama no Windows. Baixe o modelo com `ollama pull qwen3:4b`.
+Inicie a interface e selecione **Resposta com Ollama (local)** na barra lateral.
+Nenhuma chave ou crédito da OpenAI é necessário nesse modo. O modelo padrão é
+`qwen3:4b`; pode ser alterado pela variável `OLLAMA_MODEL` no `.env`.
+A geração usa a API local em `127.0.0.1:11434`, sem mostrar o raciocínio do modelo.
+Confira a explicação nas fontes: o modelo pode acrescentar informações incorretas.
+Este modo foi preparado para app e Ollama executados diretamente no mesmo Windows.
+O Docker atual não inclui Ollama; seu acesso precisa de configuração específica antes de usar IA local em contêiner.
+
+### IA pela OpenAI
+
 Copie `.env.example` para `.env` apenas se ainda não tiver esse arquivo. Preencha localmente `OPENAI_API_KEY` e `OPENAI_MODEL`. Não envie a chave ao GitHub nem a conversas. O modelo padrão é `gpt-4.1-mini`.
 
 A chave já configurada não garante saldo. É necessário crédito e acesso ao modelo na conta da API. Selecione **Resposta com OpenAI** quando sua conta estiver pronta. Pergunta e trechos recuperados serão enviados à OpenAI. O programa pede respostas apoiadas no contexto e valida os IDs das fontes; confira a resposta com o conteúdo citado.

@@ -11,6 +11,7 @@ import streamlit as st
 from dotenv import load_dotenv
 from fastembed import TextEmbedding
 from src.ai_study_assistant.answers import AnswerError, AnswerGenerator
+from src.ai_study_assistant.ollama_answers import OllamaAnswerGenerator
 from src.ai_study_assistant.history import History
 from src.ai_study_assistant.search import KeywordSearch
 from src.ai_study_assistant.semantic_search import SemanticSearch, MODEL_NAME, clear_study_index
@@ -110,7 +111,9 @@ with st.sidebar:
                     st.rerun()
         else:
             st.caption("Nenhum documento salvo para excluir.")
-    mode = st.radio("Como consultar", ["Somente trechos (sem custo de API)", "Resposta com OpenAI"])
+    mode = st.radio("Como consultar", ["Somente trechos (sem custo de API)", "Resposta com Ollama (local)", "Resposta com OpenAI"])
+    if mode == "Resposta com Ollama (local)":
+        st.caption("Mantenha o Ollama aberto. As respostas são geradas neste computador, sem créditos da OpenAI.")
     strategy = st.selectbox("Busca", ["Semântica", "Por palavras"])
     st.caption("Com OpenAI, sua pergunta e os trechos encontrados são enviados à API. É necessário saldo na conta da API.")
     st.caption("Histórico e documentos ficam neste computador. Aplicativo pessoal, sem contas de usuários.")
@@ -148,12 +151,14 @@ if question:
         sources = [asdict(result.chunk) for result in results]
         if not results:
             text = "Não encontrei trechos para essa pergunta. Tente reformular."
-        elif mode == "Resposta com OpenAI":
+        elif mode in ("Resposta com OpenAI", "Resposta com Ollama (local)"):
             key = os.getenv("OPENAI_API_KEY", "")
-            if not key:
+            if mode == "Resposta com OpenAI" and not key:
                 raise AnswerError("Configure OPENAI_API_KEY no arquivo .env antes de usar a IA.")
             with st.spinner("Gerando resposta…"):
-                generator = AnswerGenerator(key, os.getenv("OPENAI_MODEL", "gpt-4.1-mini").strip() or "gpt-4.1-mini")
+                generator = (OllamaAnswerGenerator(os.getenv("OLLAMA_MODEL", "qwen3:4b"))
+                             if mode == "Resposta com Ollama (local)" else
+                             AnswerGenerator(key, os.getenv("OPENAI_MODEL", "gpt-4.1-mini").strip() or "gpt-4.1-mini"))
                 try:
                     answer = generator.generate(question, results)
                 finally:
@@ -165,7 +170,7 @@ if question:
         logger.info("consultation_completed mode=%s sources=%d", "openai" if mode == "Resposta com OpenAI" else "search", len(sources))
     except AnswerError as error:
         st.error(str(error))
-        st.info("Você pode continuar com o modo Somente trechos enquanto resolve o saldo da API.")
+        st.info("Você pode continuar com o modo Somente trechos enquanto verifica o serviço de IA.")
         show_sources([asdict(result.chunk) for result in results])
         logger.warning("generation_failed")
     except Exception as error:
